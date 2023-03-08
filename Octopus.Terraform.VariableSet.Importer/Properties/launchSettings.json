@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Octopus.Terraform.VariableSet.Importer": {
+      "commandName": "Project",
+      "commandLineArgs": "import-library-set 2 vs_template_common c:\\sbsdev\\test.tf"
+    }
+  }
+}
