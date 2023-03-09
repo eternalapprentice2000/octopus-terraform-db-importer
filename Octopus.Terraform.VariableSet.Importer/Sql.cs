@@ -14,10 +14,10 @@ namespace Octopus.Terraform.VariableSet.Importer
             using (var conn = new SqlConnection(connString))
             {
                 var sql = $@"
-                    SELECT	[Id]
-	                    ,	[Name]
-                        ,	[JSON]
-                    FROM	[octopus_default].[dbo].[DeploymentEnvironment]";
+                    SELECT  [Id]
+	                    ,   [Name]
+                        ,   [JSON]
+                    FROM    [octopus_default].[dbo].[DeploymentEnvironment]";
         conn.Open();
 
                 using var cmd = new SqlCommand(sql, conn);
@@ -78,11 +78,12 @@ namespace Octopus.Terraform.VariableSet.Importer
             {
                 var sql = $@"
                     SELECT 
-		                    LVS.[Id]	as LibrarySetId
-	                    ,	LVS.[Name]	as LibrarySetName
-                        ,	LVS.[JSON]  as LibrarySetJson
-	                    ,	VS.[Id]		as VariableSetId
-	                    ,	VS.[JSON]	as VariableSetJson
+		                    LVS.[Id]        as LibrarySetId
+	                    ,   LVS.[Name]      as LibrarySetName
+                        ,   LVS.[JSON]      as LibrarySetJson
+                        ,   LVS.[SpaceId]   as LibrarySetSpaceId
+	                    ,   VS.[Id]         as VariableSetId
+	                    ,   VS.[JSON]       as VariableSetJson
                     FROM	[octopus_default].[dbo].[LibraryVariableSet] as LVS
                     join	dbo.VariableSet as VS 
 	                    on		LVS.VariableSetId = VS.Id
@@ -95,11 +96,13 @@ namespace Octopus.Terraform.VariableSet.Importer
                 {
                     returnValue = new LibrarySetResult
                     {
-                        LibrarySetId    = reader.GetString("LibrarySetId"),
-                        LibrarySetName  = reader.GetString("LibrarySetName"),
-                        LibrarySetJson  = reader.GetString("LibrarySetJson"),
-                        VariableSetId   = reader.GetString("VariableSetiD"),
-                        VariableSetJson = reader.GetString("VariableSetJson")
+                        LibrarySetId        = reader.GetString("LibrarySetId"),
+                        LibrarySetName      = reader.GetString("LibrarySetName"),
+                        LibrarySetJson      = reader.GetString("LibrarySetJson"),
+                        LibrarySetSpaceId   = reader.GetString("LibrarySetSpaceId"),
+                        VariableSetId       = reader.GetString("VariableSetiD"),
+                        VariableSetJson     = reader.GetString("VariableSetJson")
+
                     };
                 }
 

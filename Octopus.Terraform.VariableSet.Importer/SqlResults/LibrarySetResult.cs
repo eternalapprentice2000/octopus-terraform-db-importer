@@ -7,5 +7,7 @@
         public string? LibrarySetJson { get; set; }
         public string? VariableSetId { get; set; }
         public string? VariableSetJson { get; set; }
+
+        public string? LibrarySetSpaceId { get; set; }
     }
 }

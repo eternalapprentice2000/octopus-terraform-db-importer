@@ -1,4 +1,5 @@
 ﻿using Octopus.Terraform.VariableSet.Importer.Pocos;
+using OctopusTenantCreator.Common;
 using System.Collections;
 
 namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
@@ -17,20 +18,29 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
         private readonly string _moduleName;
         private readonly TagSets _tagSetData;
         private readonly Environments _environments;
+        private readonly string? _databaseMasterKey;
+        private readonly Cryptography _cryptography;
         const string ignore = "##IGNORE##";
-        public LibraryVariableSetsModule(LibrarySet mData, TagSets tagSetData, Environments environments, string moduleName)
+        public LibraryVariableSetsModule(LibrarySet mData, TagSets tagSetData, Environments environments, string? databaseMasterKey, string moduleName)
         {
             _mData = mData;
             _tagSetData = tagSetData;
             _environments = environments;
+            _databaseMasterKey = databaseMasterKey;
+            _cryptography = new Cryptography(_databaseMasterKey);
             _moduleName = moduleName;
         }
 
-        string _renderItem(string itemName, string? itemValue, int tabLevel = 2)
+        string _renderItem(string itemName, string? itemValue, int tabLevel = 2, string? comment = null)
         {
             if (!string.IsNullOrWhiteSpace(itemValue))
             {
-                return $"{_getTab(tabLevel)}{itemName} = \"{itemValue.Replace(@"\", @"\\")}\""; // in terraform '\' needs to be escaped in string values
+                if (!string.IsNullOrWhiteSpace(comment)){
+                    return $"{_getTab(tabLevel)}{itemName} = \"{itemValue.Replace(@"\", @"\\")}\" ## {comment}"; // in terraform '\' needs to be escaped in string values
+                } else {
+                    return $"{_getTab(tabLevel)}{itemName} = \"{itemValue.Replace(@"\", @"\\")}\""; // in terraform '\' needs to be escaped in string values
+                }
+                
             }
             return ignore;
         }
@@ -126,8 +136,6 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
 
             results.Add(_renderText("environments = [", 4));
 
-            results.Add(_renderText("]", 4));
-
             foreach (var environment in environments) {
                 var envName = "";
 
@@ -138,6 +146,8 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
 
                 results.Add(_renderText($"\"{environment}\", ## {envName}", 5));
             }
+
+            results.Add(_renderText("]", 4));
 
 
             _ = results.RemoveAll(x => x == ignore);
@@ -164,7 +174,6 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
 
             _ = results.RemoveAll(x => x == ignore);
             return String.Join("\n", results);
-
         }
 
         string _renderScope(VariableSetVariableScope? scope) {
@@ -202,7 +211,14 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
 
                     if (variable.Type == "Sensitive")
                     {
-                        results.Add(_renderItem("value", "SENSITIVE", 3));
+                        // get actual value
+                        var actualValue = "SENSITIVE";
+
+                        if (variable.Value != null && !string.IsNullOrWhiteSpace(_databaseMasterKey)){
+                            actualValue = _cryptography.DecryptSensitiveVariable(variable.Value);
+                        }
+
+                        results.Add(_renderItem("value", "SENSITIVE VALUE", 3, $"DANGER >> {actualValue}"));
                     }
                     else 
                     {
