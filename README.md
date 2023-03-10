@@ -67,12 +67,12 @@ Note: the generated code is meant to work with a custom module I wrote for varia
 
     ex:
         import-variable-set 2 vs_common_vars c:\dev\test.tf
-```
 
 Output Files:
-    <out-file>                  : terraform module file
-    <out-file>.libraryset.json  : the segement of the state file for the library set
-    <out-file>.variables.json   : the segment of the state file for the variables
+    "{out-file}"                    : terraform module file  
+    "{out-file}.libraryset.json"    : the segement of the state file for the library set  
+    "{out-file}.variables.json"     : the segment of the state file for the variables
+```
 
 
 
