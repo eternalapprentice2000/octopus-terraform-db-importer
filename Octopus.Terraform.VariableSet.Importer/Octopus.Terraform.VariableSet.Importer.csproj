@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="tfTemplates\**" />
+    <EmbeddedResource Remove="tfTemplates\**" />
+    <None Remove="tfTemplates\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KG.System.Data.SqlClient.Extensions.ReaderWrapper" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="System.CodeDom" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Templates\LibraryVariableSets\LibraryVariableSetsModule.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LibraryVariableSetsModule.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\LibraryVariableSets\LibraryVariableSetsModule.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>LibraryVariableSetsModule.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>
