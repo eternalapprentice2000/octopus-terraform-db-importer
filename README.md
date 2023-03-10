@@ -74,6 +74,14 @@ Output Files:
     "{out-file}.variables.json"     : the segment of the state file for the variables
 ```
 
+## Modify your Terraform Project
 
+1. Take the Generated TF files and plop them into your project
+    * you will need to run `terraform init` in order to get the modules downloaded
+2. Copy the state file segments into your state file
+3. Run `terraform plan` to make sure all is good.
+    * Some items might change a little and if you have a variable type that isn't yet supported in the list, you might get all kinds of weirdness. 
+    * check the plan steps to be sure all is good
+4. run `terraform apply` to finalize the state and get everything in sync.
 
 
