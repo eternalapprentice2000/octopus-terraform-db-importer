@@ -12,13 +12,6 @@ namespace Octopus.Terraform.Importer
         static void Main(string[] args)
         {
             var action = args[0];
-            var encryptionKey = Environment.GetEnvironmentVariable("OCTOPUS_MASTER_KEY");
-
-            if (string.IsNullOrWhiteSpace(encryptionKey)){
-                Console.WriteLine("Unable to locate database master key in Environment.  Secret Variable Decryption will be skipped");
-                Console.WriteLine("To enable, please set OCTOPUS_MASTER_KEY environment variable to the octopus databaer master key");
-            }
-            
 
             switch (action.ToLower())
             {
@@ -26,14 +19,14 @@ namespace Octopus.Terraform.Importer
                     if (args.Length != 4) throw new Exception("incorrect number of parameters... usage `import-libary-set <set-id> <tf module name> <out file>`");
                     _ = int.TryParse(args[1], out int _id);
 
-                    ImportLibrarySet(_id, args[2], args[3], encryptionKey ?? null as string);
+                    ImportLibrarySet(_id, args[2], args[3]);
                     break;
                 default:
                     break;
             }
         }
 
-        private static void ImportLibrarySet(int id, string moduleName, string outFile, string? databaseMasterKey) { 
+        private static void ImportLibrarySet(int id, string moduleName, string outFile) { 
             Console.WriteLine($"Importing Library Set #{id}");
 
             var variableSetId = $"LibraryVariableSets-{id}";
@@ -45,18 +38,18 @@ namespace Octopus.Terraform.Importer
             if (result == null) throw new Exception("libraryset result is null");
 
             // use template
-            var template = new LibraryVariableSetsModule(result, tagSets, envs, databaseMasterKey, moduleName);
+            var template = new LibraryVariableSetsModule(result, tagSets, envs, moduleName);
             var content = template.TransformText();
 
             File.WriteAllText(outFile, content);
 
-            // write the state file segment for this
+            // write the state file segment for the library sets
             var stateInfo = new LibrarySetState(result, moduleName);
             File.WriteAllText($"{outFile}.libraryset.json", stateInfo.ToString());
 
-
-
-
+            // write the state for the variables for the library set
+            var variableStateInfo = new VariableState(result, moduleName, tagSets);
+            File.WriteAllText($"{outFile}.variables.json", variableStateInfo.ToString());
         }
     }
 }

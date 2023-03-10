@@ -4,14 +4,11 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 module "<#= this._moduleName #>" {
-    source = "./.modules/variable_sets"
+    source = "git::https://github.com/eternalapprentice2000/octopus-terrafor-libraryset-module?ref=0.0.1"
+    ## go to https://github.com/eternalapprentice2000/octopus-terrafor-libraryset-module to see what the latest version of this is.
 
     name = "<#= this._mData.LibrarySetName  #>"
-    description         = <<-EOT
-        Common Variable set for Tenants 
-
-        Managed By Octopus Terraform
-    EOT
+    description = "<#= this._mData.LibrarySetJson.Description #> - Managed By Terraform"
     
     templates = [
 <#= _renderTemplates() #>

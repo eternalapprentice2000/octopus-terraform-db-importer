@@ -6,7 +6,7 @@ namespace Octopus.Terraform.VariableSet.Importer
 {
     public class Sql
     {
-        const string connString = "Server=localhost,8433;Database=octopus_default;User Id=sa;Password=P@ssW0rd!;";
+        private string connString = Environment.GetEnvironmentVariable("OCTOPUS_CONN_STRING") ?? "";
 
         public List<EnvironmentResult>? GetAllEnvironments() {
             var result = new List<EnvironmentResult>();
@@ -102,7 +102,6 @@ namespace Octopus.Terraform.VariableSet.Importer
                         LibrarySetSpaceId   = reader.GetString("LibrarySetSpaceId"),
                         VariableSetId       = reader.GetString("VariableSetiD"),
                         VariableSetJson     = reader.GetString("VariableSetJson")
-
                     };
                 }
 

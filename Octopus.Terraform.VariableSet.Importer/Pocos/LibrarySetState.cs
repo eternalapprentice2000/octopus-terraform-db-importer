@@ -33,9 +33,6 @@ namespace Octopus.Terraform.VariableSet.Importer.Pocos
             this.DisplaySettings = template.DisplaySettings?.Count == 0 ? null : template.DisplaySettings;
         }
     }
-
-
-
     public class LibrarySetStateInstanceAttributes {
         [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string? Description {get; set;}
@@ -52,23 +49,22 @@ namespace Octopus.Terraform.VariableSet.Importer.Pocos
         [JsonProperty("template")]
         public List<LibrarySetStateInstanceAttributesTemplate> Templates {get; set;}
 
+        [JsonProperty("variable_set_id")]
+        public string VariableSetId {get;set;}
+
         public LibrarySetStateInstanceAttributes(LibrarySet librarySet){
             this.Description = librarySet.LibrarySetJson?.Description;
             this.Id = librarySet.LibrarySetId;
             this.Name = librarySet.LibrarySetName;
             this.SpaceId = librarySet.LibrarySetSpaceId;
+            this.VariableSetId = librarySet.VariableSetId;
 
             if (librarySet.LibrarySetJson?.Templates != null){
                 this.Templates = librarySet.LibrarySetJson.Templates.Select(x => new LibrarySetStateInstanceAttributesTemplate(x)).ToList();
             } else {
                 this.Templates = new List<LibrarySetStateInstanceAttributesTemplate>();
             }
-
-            
-
         }
-
-
     }
 
     public class LibrarySetStateInstance {
@@ -82,6 +78,20 @@ namespace Octopus.Terraform.VariableSet.Importer.Pocos
 
         [JsonProperty("attributes")]
         public LibrarySetStateInstanceAttributes Attributes;
+
+        [JsonProperty("private")]
+        public string Private {
+            get{
+                return Environment.GetEnvironmentVariable("PRIVATE_VARIABLE") ?? "";
+            }
+        }
+        public List<string> SensitiveAttributes{
+            get{
+                return new List<string>();
+            }
+        }
+
+
 
         public LibrarySetStateInstance(LibrarySet librarySet){
             this.Attributes = new LibrarySetStateInstanceAttributes(librarySet);
@@ -137,9 +147,6 @@ namespace Octopus.Terraform.VariableSet.Importer.Pocos
             this.Instances = new List<LibrarySetStateInstance>{
                 new LibrarySetStateInstance(librarySet)
             };
-
-
-
         }
 
         public override string ToString(){

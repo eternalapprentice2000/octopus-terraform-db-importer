@@ -7,14 +7,14 @@ namespace Octopus.Terraform.VariableSet.Importer.Pocos
     {
         public LibrarySet(LibrarySetResult sqlResult)
         {
-            if (sqlResult.LibrarySetId == null || sqlResult.LibrarySetName == null || sqlResult.VariableSetId == null) {
+            if (sqlResult == null || sqlResult.LibrarySetId == null || sqlResult.LibrarySetName == null || sqlResult.VariableSetId == null) {
                 throw new Exception("unable to build library set, sql result contains null values");
             }
 
             LibrarySetId = sqlResult.LibrarySetId;
             LibrarySetName = sqlResult.LibrarySetName;
             VariableSetId = sqlResult.VariableSetId;
-            LibrarySetSpaceId = sqlResult.LibrarySetSpaceId;
+            LibrarySetSpaceId = sqlResult.LibrarySetSpaceId ?? "Spaces-1";
 
             LibrarySetJson = JsonConvert.DeserializeObject<LibrarySetJson?>(sqlResult.LibrarySetJson ?? "{}");
             VariableSetJson = JsonConvert.DeserializeObject<VariableSetJson?>(sqlResult.VariableSetJson ?? "{}");
@@ -48,11 +48,32 @@ namespace Octopus.Terraform.VariableSet.Importer.Pocos
     public class VariableSetJson
     {
         public List<VariableSetVariable>? Variables { get; set; }
+
+        private Dictionary<string, List<VariableSetVariable>>? _sortedVariables {get; set;}
+
+        public Dictionary<string, List<VariableSetVariable>>? GetSortedVariables() {
+            if (this.Variables == null) return _sortedVariables;
+
+            if (_sortedVariables == null) {
+                _sortedVariables = new Dictionary<string, List<VariableSetVariable>>();
+
+                foreach(var variable in this.Variables){
+                    if (!_sortedVariables.ContainsKey(variable.Name)){
+                        _sortedVariables.Add(variable.Name, new List<VariableSetVariable>());
+                    } 
+                    
+                    // not possible to be null
+                    _sortedVariables[variable.Name].Add(variable);
+                }
+            }
+
+            return _sortedVariables;            
+        }
     }
     public class VariableSetVariable
     {
-        public string? Id { get; set; }
-        public string? Name { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
         public string? Description { get; set; }
         public string? Type { get; set; }
         public string? Value { get; set; }
@@ -63,7 +84,11 @@ namespace Octopus.Terraform.VariableSet.Importer.Pocos
 
     public class VariableSetVariableScope
     {
+        public string[]? Actions {get;set;}
+        public string[]? Channels {get;set;}
         public string[]? Environment { get; set; }
+        public string[]? Machines {get;set;}
+        public string[]? Roles {get;set;}
         public string[]? TenantTag { get; set; }
     }
 }

@@ -1,16 +1,8 @@
 ﻿using Octopus.Terraform.VariableSet.Importer.Pocos;
 using OctopusTenantCreator.Common;
-using System.Collections;
 
 namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
 {
-    class VariableComparer : IComparer<VariableSetVariable>
-    {
-        public int Compare(VariableSetVariable? x, VariableSetVariable? y)
-        {
-            return (new CaseInsensitiveComparer()).Compare(x?.Name, y?.Name);
-        }
-    }
 
     partial class LibraryVariableSetsModule
     {
@@ -18,16 +10,12 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
         private readonly string _moduleName;
         private readonly TagSets _tagSetData;
         private readonly Environments _environments;
-        private readonly string? _databaseMasterKey;
-        private readonly Cryptography _cryptography;
         const string ignore = "##IGNORE##";
-        public LibraryVariableSetsModule(LibrarySet mData, TagSets tagSetData, Environments environments, string? databaseMasterKey, string moduleName)
+        public LibraryVariableSetsModule(LibrarySet mData, TagSets tagSetData, Environments environments, string moduleName)
         {
             _mData = mData;
             _tagSetData = tagSetData;
             _environments = environments;
-            _databaseMasterKey = databaseMasterKey;
-            _cryptography = new Cryptography(_databaseMasterKey);
             _moduleName = moduleName;
         }
 
@@ -81,11 +69,10 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
                             results.Add(_renderText($"\"{option}\"", 6));
                         }
                     }
-
                     results.Add(_renderText("]", 5));
+                    results.Add(_renderText(")", 4));
 
-                } else
-                {
+                } else {
                     results.Add($"{_getTab(4)}\"{key}\" = \"{displaySettings[key].Replace("\n", "\\n")}\"");
                 }
             }
@@ -128,13 +115,13 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
             _ = results.RemoveAll(x => x == ignore);
             return String.Join("\n", results);
         }
-        string _renderScopeEnvironments(string[]? environments)
+        string _renderScopeEnvironments(string[]? environments, int tabLevel)
         {
             if (environments == null) return ignore;
 
             var results = new List<string>();
 
-            results.Add(_renderText("environments = [", 4));
+            results.Add(_renderText("environments = [", tabLevel));
 
             foreach (var environment in environments) {
                 var envName = "";
@@ -144,99 +131,89 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
                 }
 
 
-                results.Add(_renderText($"\"{environment}\", ## {envName}", 5));
+                results.Add(_renderText($"\"{environment}\", ## {envName}", tabLevel + 1));
             }
 
-            results.Add(_renderText("]", 4));
+            results.Add(_renderText("]", tabLevel));
 
 
             _ = results.RemoveAll(x => x == ignore);
             return String.Join("\n", results);
         }
 
-        string _renderScopeTenantTags(string[]? tenantTags) {
+        string _renderScopeTenantTags(string[]? tenantTags, int tabLevel) {
             if (tenantTags == null) return ignore;
 
             var results = new List<string>();
 
-            results.Add(_renderText("tenant_tags = [", 4));
+            results.Add(_renderText("tenant_tags = [", tabLevel));
 
             foreach (var tag in tenantTags) {
 
                 if (_tagSetData.Tags.ContainsKey(tag.ToLower()))
                 {
                     var canonicalTag = _tagSetData.Tags[tag.ToLower()];
-                    results.Add(_renderText($"\"{canonicalTag}\",", 5));
+                    results.Add(_renderText($"\"{canonicalTag}\",", tabLevel + 1));
                 }
             }
 
-            results.Add(_renderText("]", 4));
+            results.Add(_renderText("]", tabLevel));
 
             _ = results.RemoveAll(x => x == ignore);
             return String.Join("\n", results);
         }
 
-        string _renderScope(VariableSetVariableScope? scope) {
+        string _renderScope(VariableSetVariableScope? scope, int tabLevel) {
             if (scope == null) return ignore;
             var results = new List<string>();
 
-            results.Add(_renderText("scope = {", 3));
+            results.Add(_renderText("scope = {", tabLevel));
 
-            results.Add(_renderScopeTenantTags(scope.TenantTag));
-            results.Add(_renderScopeEnvironments(scope.Environment));
+            results.Add(_renderScopeTenantTags(scope.TenantTag, tabLevel + 1));
+            results.Add(_renderScopeEnvironments(scope.Environment, tabLevel + 1));
 
-            results.Add(_renderText("}", 3));
+            results.Add(_renderText("}", tabLevel));
             _ = results.RemoveAll(x => x == ignore);
             return string.Join("\n", results);
         }
 
         string _renderVariables() {
-            var variables = this._mData.VariableSetJson?.Variables;
+            var variables = this._mData.VariableSetJson?.GetSortedVariables();
 
             if (variables == null) return String.Empty;
 
-            variables.Sort(new VariableComparer());
-
             var results = new List<string>();
 
-            for (var i = 0; i <= variables.Count - 1; i++) {
-                var variable = variables[i];
+            foreach(var sortedVariable in variables){
+                results.Add(_renderText("{", 2));
+                results.Add(_renderItem("name", sortedVariable.Key, 3));
+                results.Add(_renderText("values = [", 3));
 
-                if (variable != null)
-                {
-                    results.Add(_renderText("{", 2));
-                    results.Add(_renderItem("name", variable.Name, 3));
-                    results.Add(_renderItem("description", variable.Description, 3));
-                    results.Add(_renderItem("type", variable.Type, 3));
+                foreach(var variable in sortedVariable.Value){
+                    results.Add(_renderText("{", 4));
+                    results.Add(_renderItem("id", variable.Id, 5));
+                    results.Add(_renderItem("description", variable.Description, 5));
+                    results.Add(_renderItem("type", variable.Type, 5));
 
                     if (variable.Type == "Sensitive")
                     {
                         // get actual value
-                        var actualValue = "SENSITIVE";
+                        var actualValue = Cryptography.DecryptSensitiveVariable(variable.Value);
+                        
 
-                        if (variable.Value != null && !string.IsNullOrWhiteSpace(_databaseMasterKey)){
-                            actualValue = _cryptography.DecryptSensitiveVariable(variable.Value);
-                        }
-
-                        results.Add(_renderItem("value", "SENSITIVE VALUE", 3, $"DANGER >> {actualValue}"));
+                        results.Add(_renderItem("value", actualValue, 5, "DANGER!!!!!"));
                     }
                     else 
                     {
-                        results.Add(_renderItem("value", variable.Value, 3));
+                        results.Add(_renderItem("value", variable.Value, 5));
                     }
 
-                    results.Add(_renderScope(variable.Scope));
-                   
-
-                    if (i != variables.Count - 1)
-                    {
-                        results.Add(_renderText("},", 2));
-                    }
-                    else
-                    {
-                        results.Add(_renderText("}", 2));
-                    }
+                    results.Add(_renderScope(variable.Scope, 5));
+                    results.Add(_renderText("},", 4));
                 }
+
+                results.Add(_renderText("]", 3));
+                results.Add(_renderText("},", 2));
             }
 
             _ = results.RemoveAll(x => x == ignore);

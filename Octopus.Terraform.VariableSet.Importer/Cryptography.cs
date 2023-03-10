@@ -3,15 +3,15 @@ using System.Text;
 
 namespace OctopusTenantCreator.Common
 {
-    public class Cryptography
+    public static class Cryptography
     {
-        private string? _masterKey { get; set; }
-        public Cryptography(string? masterKey)
-        {
-            _masterKey = masterKey;
-        }
-        
-        public string DecryptSensitiveVariable (string encodedValue)
+        private static string? _masterKey { 
+            get {
+                return Environment.GetEnvironmentVariable("OCTOPUS_MASTER_KEY");
+            }
+         }
+
+        public static string? DecryptSensitiveVariable (string? encodedValue)
         {
             if (string.IsNullOrWhiteSpace(_masterKey)) return encodedValue;
             if (string.IsNullOrWhiteSpace(encodedValue)) return encodedValue;

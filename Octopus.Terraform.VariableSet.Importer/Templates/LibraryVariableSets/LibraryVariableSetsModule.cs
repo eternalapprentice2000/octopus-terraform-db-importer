@@ -18,7 +18,7 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\sbsdev\git\SBS.DevOps.utility-migrate-terraform-octopus\Octopus.Terraform.VariableSet.Importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
+    #line 1 "C:\sbsdev\git\octopus-terraform-db-importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class LibraryVariableSetsModule : LibraryVariableSetsModuleBase
     {
@@ -30,30 +30,39 @@ namespace Octopus.Terraform.VariableSet.Importer.Templates.LibraryVariableSets
         {
             this.Write("module \"");
             
-            #line 6 "C:\sbsdev\git\SBS.DevOps.utility-migrate-terraform-octopus\Octopus.Terraform.VariableSet.Importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
+            #line 6 "C:\sbsdev\git\octopus-terraform-db-importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this._moduleName));
             
             #line default
             #line hidden
-            this.Write("\" {\r\n    source = \"./.modules/variable_sets\"\r\n\r\n    name = \"");
+            this.Write(@""" {
+    source = ""git::https://github.com/eternalapprentice2000/octopus-terrafor-libraryset-module?ref=0.0.1""
+    ## go to https://github.com/eternalapprentice2000/octopus-terrafor-libraryset-module to see what the latest version of this is.
+
+    name = """);
             
-            #line 9 "C:\sbsdev\git\SBS.DevOps.utility-migrate-terraform-octopus\Octopus.Terraform.VariableSet.Importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
+            #line 10 "C:\sbsdev\git\octopus-terraform-db-importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(this._mData.LibrarySetName));
             
             #line default
             #line hidden
-            this.Write("\"\r\n    description         = <<-EOT\r\n        Common Variable set for Tenants \r\n\r\n" +
-                    "        Managed By Octopus Terraform\r\n        <https://github.com/LexisNexis-RBA" +
-                    "/SBS.Octopus.tf-octopus-configuration>\r\n    EOT\r\n    \r\n    templates = [\r\n");
+            this.Write("\"\r\n    description = \"");
             
-            #line 18 "C:\sbsdev\git\SBS.DevOps.utility-migrate-terraform-octopus\Octopus.Terraform.VariableSet.Importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
+            #line 11 "C:\sbsdev\git\octopus-terraform-db-importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(this._mData.LibrarySetJson.Description));
+            
+            #line default
+            #line hidden
+            this.Write(" - Managed By Terraform\"\r\n    \r\n    templates = [\r\n");
+            
+            #line 14 "C:\sbsdev\git\octopus-terraform-db-importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_renderTemplates()));
             
             #line default
             #line hidden
             this.Write("\r\n    ]\r\n\r\n    variables = [\r\n");
             
-            #line 22 "C:\sbsdev\git\SBS.DevOps.utility-migrate-terraform-octopus\Octopus.Terraform.VariableSet.Importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
+            #line 18 "C:\sbsdev\git\octopus-terraform-db-importer\Octopus.Terraform.VariableSet.Importer\Templates\LibraryVariableSets\LibraryVariableSetsModule.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_renderVariables()));
             
             #line default

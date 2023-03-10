@@ -14,14 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="TF_LibraryVariableSetModule.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TF_LibraryVariableSetModule.tt</DependentUpon>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="KG.System.Data.SqlClient.Extensions.ReaderWrapper" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.CodeDom" Version="7.0.0" />
